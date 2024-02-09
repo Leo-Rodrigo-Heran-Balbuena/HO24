@@ -177,6 +177,36 @@ class TSPDecoder:
         """
         return self.availabool
 
+    def getTouch(self):
+        """
+        Interprets the current frame data to detect a touch and returns the coordinates.
+
+        Returns
+        -------
+        tuple or None:
+            The coordinates (x, y) of the touch event if detected, otherwise None.
+        """
+        TOUCH_THRESHOLD = 50  # Example threshold, adjust based on your device's sensitivity
+
+        # Assuming self.frTraceback (most recent call last):
+        #   File "C:\Users\user\PycharmProjects\HO24\Files\python_game_signoff.py", line 131, in <module>
+        #     touch_pos = TSP.getTouch()  # Get touch coordinates
+        #                 ^^^^^^^^^^^^
+        # AttributeError: 'TSPDecoder' object has no attribute 'getTouch'
+        #
+        # Process finished with exit code 1ame is a 2D array with touch intensity values
+        for row in range(self.rows):
+            for col in range(self.columns):
+                if self.frame[row][col] > TOUCH_THRESHOLD:
+                    # Touch detected, map touchpad coordinates to screen coordinates
+                    x = int((col / self.columns) * 800)
+                    y = int((row / self.rows) * 600)
+                    return (x, y)
+
+                # If no touch is detected
+                else:
+                    return None
+
     def getSerialPort(self) -> serial.tools.list_ports_common.ListPortInfo:
         """
         Returns the port/device of the first connected Arduino.
@@ -214,6 +244,37 @@ class TSPDecoder:
             self.getSerialPort()
         else:
             return device
+
+
+def getTouch(self):
+    """
+    Interprets the current frame data to detect a touch and returns the coordinates.
+
+    Returns
+    -------
+    tuple or None:
+        The coordinates (x, y) of the touch event if detected, otherwise None.
+    """
+    TOUCH_THRESHOLD = 50  # Example threshold, adjust based on your device's sensitivity
+
+    # Assuming self.frTraceback (most recent call last):
+    #   File "C:\Users\user\PycharmProjects\HO24\Files\python_game_signoff.py", line 131, in <module>
+    #     touch_pos = TSP.getTouch()  # Get touch coordinates
+    #                 ^^^^^^^^^^^^
+    # AttributeError: 'TSPDecoder' object has no attribute 'getTouch'
+    #
+    # Process finished with exit code 1ame is a 2D array with touch intensity values
+    for row in range(self.rows):
+        for col in range(self.columns):
+            if self.frame[row][col] > TOUCH_THRESHOLD:
+                # Touch detected, map touchpad coordinates to screen coordinates
+                x = int((col / self.columns) * 800)
+                y = int((row / self.rows) * 600)
+                return (x, y)
+
+            # If no touch is detected
+            else:
+                return None
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -263,3 +324,11 @@ def AsciiDecoder(b) -> str:
         return ""
     # bitmasks the last byte of b and returns decoded character
     return chr(b & 0xFF)
+
+
+
+
+
+
+
+
