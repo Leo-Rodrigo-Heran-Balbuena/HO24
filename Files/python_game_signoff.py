@@ -16,9 +16,8 @@ SCREEN_HEIGHT = rows * PIXEL_HEIGHT + rows * PIXEL_MARGIN + 2 * PIXEL_MARGIN
 last_spawn_time = 0  # Tracks when the last boat was spawned
 SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 TARGET_SIZE = 50  # Size of the target area (square side length)
-target_area = pygame.Rect(SCREEN_CENTER[0] - TARGET_SIZE // 2, SCREEN_CENTER[1] - TARGET_SIZE // 2, TARGET_SIZE, TARGET_SIZE)
-
-
+target_area = pygame.Rect(SCREEN_CENTER[0] - TARGET_SIZE // 2, SCREEN_CENTER[1] - TARGET_SIZE // 2, TARGET_SIZE,
+                          TARGET_SIZE)
 
 # INDEXING
 X, Y = 0, 1
@@ -47,6 +46,8 @@ total_boats_reached_center = 0  # Initialize this before the game loop
 
 # Initialise the PyGame Clock for timing
 clock = pygame.time.Clock()
+
+
 def check_boats_center():
     global boat_list
     boats_reached_center = 0
@@ -55,6 +56,7 @@ def check_boats_center():
             boat_list.remove(boat)  # Optional: Remove boat after reaching the center
             boats_reached_center += 1
     return boats_reached_center
+
 
 def random_border_position():
     side = random.randint(1, 4)
@@ -67,6 +69,7 @@ def random_border_position():
     else:  # Left
         return 0, random.randint(0, SCREEN_HEIGHT)
 
+
 def gen_boats(number_of_boats):
     global boat_list
     for _ in range(number_of_boats):
@@ -74,6 +77,7 @@ def gen_boats(number_of_boats):
         boat = pygame.Rect(position[0], position[1], 20, 20)
         direction = random.choice([UP, DOWN, LEFT, RIGHT, DIAGONAL])
         boat_list.append([boat, direction, speed])
+
 
 def move_boats():
     global boat_list
@@ -90,13 +94,17 @@ def move_boats():
         boat[BOAT_RECT].move_ip(new_direction[X] * boat[BOAT_SPEED], new_direction[Y] * boat[BOAT_SPEED])
 
         # Check if the boat is out of screen bounds and remove it
-        if boat[BOAT_RECT].right < 0 or boat[BOAT_RECT].left > SCREEN_WIDTH or boat[BOAT_RECT].bottom < 0 or boat[BOAT_RECT].top > SCREEN_HEIGHT:
+        if boat[BOAT_RECT].right < 0 or boat[BOAT_RECT].left > SCREEN_WIDTH or boat[BOAT_RECT].bottom < 0 or boat[
+            BOAT_RECT].top > SCREEN_HEIGHT:
             boat_list.remove(boat)
+
+
 def remove_boat_on_touch(touch_pos):
     for index, boat in enumerate(boat_list):
         if boat[BOAT_RECT].collidepoint(touch_pos):
             del boat_list[index]  # Remove the boat if touch collides
             break  # Assume only one touch at a time
+
 
 last_spawn_time = pygame.time.get_ticks()  # Initialize the spawn timer
 
@@ -119,41 +127,44 @@ while TSP.available():
     # Clear the screen by blacking it out
     screen.fill(BLACK)
 
-    # Draw boats
-    for boat in boat_list:
-        pygame.draw.rect(screen, RED, boat[BOAT_RECT])
-
-    total_boats_reached_center += check_boats_center()
-
     # Display the counter
-    counter_text = font.render(f"Boats Reached Center: {total_boats_reached_center}", True, (255, 255, 255))
-    screen.blit(counter_text, (10, 10))
+
     touch_pos = TSP.getTouch()  # Get touch coordinates
     if touch_pos is not None:
         remove_boat_on_touch(touch_pos)  # Handle touch event, assuming you adapt the function to accept touch_pos
     touch_pos = TSP.getTouch()
-    if touch_pos:
-        print("Touch detected at:", touch_pos)
 
+
+    rect_list = list()
     # Loop through all pixels in the frame
     for row in range(rows):
         for column in range(columns):
             # Get the pixel value and set the gray value accordingly
             pixel = grid[row][column]
-            color = (pixel, pixel, pixel)
+            if grid[row][column] > 150:
 
-            # Draw the pixel on the screen
-            pygame.draw.rect(
-                screen,
-                color,
-                [
-                    PIXEL_MARGIN + ((PIXEL_MARGIN + PIXEL_WIDTH) * column),
-                    PIXEL_MARGIN + ((PIXEL_MARGIN + PIXEL_HEIGHT) * row),
-                    PIXEL_WIDTH,
-                    PIXEL_HEIGHT
-                ]
-            )
+                color = (pixel, pixel, pixel)
 
+                rect_list.append(pygame.Rect(
+                        PIXEL_MARGIN + ((PIXEL_MARGIN + PIXEL_WIDTH) * column),
+                        PIXEL_MARGIN + ((PIXEL_MARGIN + PIXEL_HEIGHT) * row),
+                        PIXEL_WIDTH,
+                        PIXEL_HEIGHT))
+
+    # Draw rectangles in the screen
+    for i in rect_list:
+        pygame.draw.rect(screen, color, i)
+        boat_list_copy = boat_list.copy()
+        for j in boat_list_copy:
+            if (i.colliderect(j[BOAT_RECT])):
+                boat_list.remove(j)
+    # Draw boats
+    for boat in boat_list:
+        pygame.draw.rect(screen, RED, boat[BOAT_RECT])
+
+    total_boats_reached_center += check_boats_center()
+    counter_text = font.render(f"Boats Reached Center: {total_boats_reached_center}", True, (255, 255, 255))
+    screen.blit(counter_text, (10, 10))
     # Limit the framerate to 60FPS
     clock.tick(60)
 
